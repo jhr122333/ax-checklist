@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AX 카드뉴스 · 고급편</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --color: #EF4444;
+    --color-dark: #B91C1C;
+    --color-light: #FECACA;
+    --color-bg: #FEF2F2;
+  }
+
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #0F172A;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(15,23,42,0.92);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .topbar-left a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s;
+  }
+  .topbar-left a:hover { color: white; }
+  .topbar-center { display: flex; align-items: center; gap: 8px; }
+  .level-badge {
+    background: linear-gradient(135deg, #EF4444, #F59E0B);
+    color: white;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .slide-counter { color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; }
+  .topbar-right { width: 120px; display: flex; justify-content: flex-end; }
+
+  .slider-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 16px 80px;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    min-height: calc(100vh - 140px);
+    border-radius: 28px;
+    overflow: hidden;
+    animation: fadeIn 0.35s ease;
+  }
+  .slide.active { display: flex; flex-direction: column; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .slide-cover {
+    background: linear-gradient(145deg, #1C0505 0%, #7F1D1D 40%, #EF4444 80%, #F59E0B 100%);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 52px 40px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide-cover::before {
+    content: ''; position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .cover-num { font-size: 13px; font-weight: 700; letter-spacing: 2px; opacity: 0.6; margin-bottom: 16px; }
+  .cover-emoji { font-size: 80px; margin-bottom: 20px; line-height: 1; }
+  .cover-title { font-size: clamp(28px, 6vw, 44px); font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+  .cover-sub { font-size: 16px; opacity: 0.8; line-height: 1.6; }
+  .cover-tag {
+    margin-top: 28px;
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .slide-content { background: white; flex-direction: column; }
+  .slide-header {
+    background: var(--color-bg);
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--color-light);
+  }
+  .slide-header .s-num { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--color); margin-bottom: 8px; }
+  .slide-header h2 { font-size: clamp(20px, 4vw, 28px); font-weight: 800; color: #1E293B; line-height: 1.3; }
+  .slide-header .s-icon { font-size: 32px; margin-bottom: 8px; }
+  .slide-body { padding: 24px 32px; flex: 1; }
+
+  .framework-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .fs-num {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--color), #F59E0B);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .fs-content { flex: 1; }
+  .fs-title { font-size: 14px; font-weight: 700; color: #1E293B; margin-bottom: 3px; }
+  .fs-desc { font-size: 12px; color: #64748B; line-height: 1.4; }
+
+  .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+  .agent-card {
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 14px;
+    border-top: 3px solid var(--color);
+  }
+  .agent-card .ac-icon { font-size: 22px; margin-bottom: 6px; }
+  .agent-card .ac-name { font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+  .agent-card .ac-desc { font-size: 12px; color: #64748B; line-height: 1.4; }
+
+  .roadmap-timeline { position: relative; padding-left: 24px; }
+  .roadmap-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color), #F59E0B);
+    border-radius: 99px;
+  }
+  .timeline-item { position: relative; margin-bottom: 14px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -20px; top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--color);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--color);
+  }
+  .ti-period { font-size: 11px; font-weight: 700; color: var(--color); margin-bottom: 3px; }
+  .ti-title { font-size: 14px; font-weight: 700; color: #1E293B; margin-bottom: 3px; }
+  .ti-desc { font-size: 12px; color: #64748B; line-height: 1.4; }
+
+  .roi-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  .roi-table th {
+    background: var(--color-bg);
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-dark);
+    text-align: left;
+    border-bottom: 2px solid var(--color-light);
+  }
+  .roi-table td {
+    padding: 9px 10px;
+    font-size: 12px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+    line-height: 1.4;
+  }
+  .roi-table tr:last-child td { border-bottom: none; }
+
+  .change-card {
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+  }
+  .change-icon { font-size: 22px; flex-shrink: 0; }
+  .change-title { font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 3px; }
+  .change-desc { font-size: 12px; color: #64748B; line-height: 1.4; }
+
+  .tech-select { margin: 8px 0; }
+  .ts-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  .ts-row:last-child { border-bottom: none; }
+  .ts-badge {
+    background: var(--color-bg);
+    color: var(--color-dark);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 64px;
+    text-align: center;
+  }
+  .ts-content { flex: 1; }
+  .ts-title { font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 2px; }
+  .ts-when { font-size: 12px; color: #64748B; }
+
+  .ethics-check { list-style: none; }
+  .ethics-check li {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+    align-items: flex-start;
+  }
+  .ethics-check li:last-child { border-bottom: none; }
+  .ec-box {
+    width: 20px; height: 20px;
+    border: 2px solid var(--color);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    background: var(--color-bg);
+    color: var(--color-dark);
+    font-weight: 700;
+  }
+
+  .case-card {
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--color);
+  }
+  .case-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .case-company { font-size: 13px; font-weight: 700; color: #1E293B; }
+  .case-tag {
+    background: var(--color);
+    color: white;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .case-desc { font-size: 12px; color: #475569; line-height: 1.5; }
+  .case-result { font-size: 12px; font-weight: 700; color: var(--color-dark); margin-top: 4px; }
+
+  .highlight-box {
+    background: var(--color-bg);
+    border-left: 4px solid var(--color);
+    border-radius: 0 12px 12px 0;
+    padding: 14px 16px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #7F1D1D;
+    line-height: 1.6;
+  }
+  .highlight-box strong { font-weight: 700; }
+
+  .slide-ending {
+    background: linear-gradient(145deg, #1C0505 0%, #7F1D1D 50%, #EF4444 80%, #F59E0B 100%);
+    color: white;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 48px 36px;
+  }
+  .ending-emoji { font-size: 64px; margin-bottom: 16px; }
+  .ending-title { font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+  .ending-desc { font-size: 15px; opacity: 0.85; line-height: 1.7; margin-bottom: 24px; }
+  .mission-box {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .mission-box .m-title { font-size: 12px; font-weight: 700; letter-spacing: 1px; opacity: 0.7; margin-bottom: 10px; text-align: center; }
+  .mission-box .m-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .mission-box .m-item:last-child { margin-bottom: 0; }
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: var(--color-dark);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .btn-back:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+
+  .nav-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 72px;
+    background: rgba(15,23,42,0.95);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 100;
+  }
+  .nav-btn {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .dots-wrap { display: flex; gap: 5px; align-items: center; }
+  .dot { width: 5px; height: 5px; border-radius: 99px; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 0.25s; }
+  .dot.active { width: 18px; background: var(--color); }
+
+  @media (max-width: 480px) {
+    .agent-grid { grid-template-columns: 1fr; }
+    .slide-header { padding: 20px 20px 16px; }
+    .slide-body { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="ax-main.html">← 메인으로</a>
+  </div>
+  <div class="topbar-center">
+    <span class="level-badge">🏆 고급</span>
+    <span class="slide-counter" id="counter">1 / 10</span>
+  </div>
+  <div class="topbar-right"></div>
+</div>
+
+<div class="slider-wrap" id="sliderWrap">
+
+<!-- 슬라이드 1: 표지 -->
+<div class="slide slide-cover active" id="s1">
+  <div class="cover-num">AX 카드뉴스 · 고급편</div>
+  <div class="cover-emoji">🏆</div>
+  <div class="cover-title">전략·실행·변화를<br>이끄는 자</div>
+  <div class="cover-sub">조직의 AI 전환을 설계하는<br>AX 고급 리더십 가이드 10장</div>
+  <div class="cover-tag">AX 전략 + 조직 변화 + 기술 아키텍처</div>
+</div>
+
+<!-- 슬라이드 2: AX 전략 수립 프레임워크 -->
+<div class="slide slide-content" id="s2">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 02 / 10</div>
+    <div class="s-icon">🗺️</div>
+    <h2>AX 전략 수립<br>5단계 프레임워크</h2>
+  </div>
+  <div class="slide-body">
+    <div class="framework-step">
+      <div class="fs-num">1</div>
+      <div class="fs-content">
+        <div class="fs-title">현황 진단 (As-Is Analysis)</div>
+        <div class="fs-desc">현재 업무 프로세스의 비효율 지점과 AI 적용 가능 영역 파악. 데이터 현황·시스템 성숙도 평가.</div>
+      </div>
+    </div>
+    <div class="framework-step">
+      <div class="fs-num">2</div>
+      <div class="fs-content">
+        <div class="fs-title">비전·목표 설정 (To-Be Vision)</div>
+        <div class="fs-desc">3~5년 후 AI가 내재화된 조직의 모습 정의. 구체적 KPI와 성공 기준 수립.</div>
+      </div>
+    </div>
+    <div class="framework-step">
+      <div class="fs-num">3</div>
+      <div class="fs-content">
+        <div class="fs-title">파일럿 선정 (Quick Win)</div>
+        <div class="fs-desc">효과가 크고 위험이 낮은 과제 2~3개로 빠른 성공 사례 창출. 조직 신뢰 확보.</div>
+      </div>
+    </div>
+    <div class="framework-step">
+      <div class="fs-num">4</div>
+      <div class="fs-content">
+        <div class="fs-title">스케일업 (Scale-Up)</div>
+        <div class="fs-desc">파일럿 성과를 기반으로 전사 확산. 플랫폼·인프라·거버넌스 체계 구축.</div>
+      </div>
+    </div>
+    <div class="framework-step">
+      <div class="fs-num">5</div>
+      <div class="fs-content">
+        <div class="fs-title">지속 혁신 (Continuous Innovation)</div>
+        <div class="fs-desc">AI 신기술 모니터링·적용. 데이터 플라이휠 구축으로 자기 강화 사이클 완성.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 3: AI 에이전트 고도화 -->
+<div class="slide slide-content" id="s3">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 03 / 10</div>
+    <div class="s-icon">🤖</div>
+    <h2>AI 에이전트<br>설계 & 오케스트레이션</h2>
+  </div>
+  <div class="slide-body">
+    <p style="font-size:13px;color:#64748B;margin-bottom:12px;">AI 에이전트는 스스로 계획하고, 도구를 사용하며, 목표를 달성하는 자율 AI 시스템입니다.</p>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="ac-icon">🔍</div>
+        <div class="ac-name">리서치 에이전트</div>
+        <div class="ac-desc">웹 검색·문서 분석 → 인사이트 보고서 자동 생성</div>
+      </div>
+      <div class="agent-card">
+        <div class="ac-icon">📧</div>
+        <div class="ac-name">커뮤니케이션 에이전트</div>
+        <div class="ac-desc">이메일 분류·답변 초안 작성·일정 조율 자동화</div>
+      </div>
+      <div class="agent-card">
+        <div class="ac-icon">📊</div>
+        <div class="ac-name">분석 에이전트</div>
+        <div class="ac-desc">데이터 수집·분석·시각화·인사이트 도출 자동화</div>
+      </div>
+      <div class="agent-card">
+        <div class="ac-icon">🎯</div>
+        <div class="ac-name">오케스트레이터</div>
+        <div class="ac-desc">여러 에이전트를 조율해 복잡한 업무 파이프라인 실행</div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <strong>핵심:</strong> 단일 AI 활용 → 에이전트 네트워크로 진화.<br>Claude Code, LangGraph, CrewAI 등의 프레임워크를 활용하세요.
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 4: 조직 AX 로드맵 설계 -->
+<div class="slide slide-content" id="s4">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 04 / 10</div>
+    <div class="s-icon">📅</div>
+    <h2>조직 AX 로드맵<br>설계 템플릿</h2>
+  </div>
+  <div class="slide-body">
+    <div class="roadmap-timeline">
+      <div class="timeline-item">
+        <div class="ti-period">단기 (0~6개월)</div>
+        <div class="ti-title">기반 구축 & 파일럿</div>
+        <div class="ti-desc">AI 도구 도입·교육 / 파일럿 3개 완료 / AI 거버넌스 초안 수립 / 챔피언 그룹 구성</div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-period">중기 (6~18개월)</div>
+        <div class="ti-title">확산 & 성과 측정</div>
+        <div class="ti-desc">전사 AI 도구 표준화 / 부서별 AI 워크플로우 구축 / ROI 측정 체계 가동 / AI 역량 교육 체계화</div>
+      </div>
+      <div class="timeline-item">
+        <div class="ti-period">장기 (18개월~)</div>
+        <div class="ti-title">혁신 & 경쟁 우위</div>
+        <div class="ti-desc">AI 기반 신규 서비스 출시 / 데이터 플라이휠 구축 / 업계 AX 선도 기업 포지셔닝</div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <strong>성공 조건:</strong> 경영진의 강력한 스폰서십 + 전담 AX 조직 + 측정 가능한 KPI
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 5: AI 도입 ROI 측정법 -->
+<div class="slide slide-content" id="s5">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 05 / 10</div>
+    <div class="s-icon">📈</div>
+    <h2>AI 도입 ROI<br>측정 방법론</h2>
+  </div>
+  <div class="slide-body">
+    <table class="roi-table">
+      <thead>
+        <tr>
+          <th>측정 영역</th>
+          <th>핵심 KPI 예시</th>
+          <th>목표치</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>⏱️ 시간 효율</td>
+          <td>업무 처리 시간</td>
+          <td>30~50% 단축</td>
+        </tr>
+        <tr>
+          <td>💰 비용 절감</td>
+          <td>인건비·외주비</td>
+          <td>20~40% 절감</td>
+        </tr>
+        <tr>
+          <td>📊 품질 향상</td>
+          <td>오류율·재작업률</td>
+          <td>50% 감소</td>
+        </tr>
+        <tr>
+          <td>😊 만족도</td>
+          <td>직원·고객 NPS</td>
+          <td>+10~20점</td>
+        </tr>
+        <tr>
+          <td>🚀 속도</td>
+          <td>출시·납기 속도</td>
+          <td>20~30% 향상</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="highlight-box">
+      <strong>ROI 공식:</strong> (AI 도입 후 절감 비용 + 매출 증가) ÷ AI 투자 비용 × 100<br>
+      파일럿 단계부터 베이스라인 측정을 시작하세요.
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 6: 변화관리 & 팀 역량 구축 -->
+<div class="slide slide-content" id="s6">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 06 / 10</div>
+    <div class="s-icon">🔄</div>
+    <h2>변화관리 &<br>팀 AI 역량 구축 전략</h2>
+  </div>
+  <div class="slide-body">
+    <div class="change-card">
+      <div class="change-icon">😰</div>
+      <div>
+        <div class="change-title">저항 극복 — "AI가 내 일을 빼앗는다"</div>
+        <div class="change-desc">AI는 대체재가 아닌 협력자임을 강조. AI가 단순 업무를 처리하면 사람은 더 창의적 일에 집중 가능함을 보여주세요.</div>
+      </div>
+    </div>
+    <div class="change-card">
+      <div class="change-icon">🎓</div>
+      <div>
+        <div class="change-title">역량 체계 — 3단계 교육 설계</div>
+        <div class="change-desc">① AI 리터러시 (전 직원) → ② 실무 활용 (직무별) → ③ AX 전략가 (리더) 단계별 맞춤 교육.</div>
+      </div>
+    </div>
+    <div class="change-card">
+      <div class="change-icon">🏆</div>
+      <div>
+        <div class="change-title">인센티브 — AX 챔피언 프로그램</div>
+        <div class="change-desc">AI 우수 활용 사례 공모·시상. 성공 경험을 조직 내 바이럴로 확산시키는 구조 설계.</div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <strong>핵심 원칙:</strong> 기술보다 <strong>사람의 변화</strong>가 먼저입니다. AX의 80%는 Change Management입니다.
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 7: 생성형 AI API 활용 전략 -->
+<div class="slide slide-content" id="s7">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 07 / 10</div>
+    <div class="s-icon">⚡</div>
+    <h2>생성형 AI API<br>활용 전략 선택 기준</h2>
+  </div>
+  <div class="slide-body">
+    <div class="tech-select">
+      <div class="ts-row">
+        <div class="ts-badge">RAG</div>
+        <div class="ts-content">
+          <div class="ts-title">검색 증강 생성 (RAG)</div>
+          <div class="ts-when">사내 문서·지식베이스 기반 Q&A가 필요할 때. 최신 정보 반영, 환각 최소화.</div>
+        </div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-badge">파인튜닝</div>
+        <div class="ts-content">
+          <div class="ts-title">Fine-tuning</div>
+          <div class="ts-when">특정 말투·형식·도메인 지식이 일관되게 필요할 때. 비용↑, 품질↑↑.</div>
+        </div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-badge">에이전트</div>
+        <div class="ts-content">
+          <div class="ts-title">AI Agent</div>
+          <div class="ts-when">다단계 추론·외부 시스템 연동·자율 실행이 필요한 복잡한 업무 자동화.</div>
+        </div>
+      </div>
+      <div class="ts-row">
+        <div class="ts-badge">프롬프트</div>
+        <div class="ts-content">
+          <div class="ts-title">Prompt Engineering만</div>
+          <div class="ts-when">빠른 프로토타이핑·단순 반복 작업. 비용 최저, 구현 최속.</div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <strong>선택 원칙:</strong> 가장 단순한 방법으로 시작하세요. 대부분의 문제는 좋은 프롬프트로 해결됩니다.
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 8: AI 윤리·보안·컴플라이언스 -->
+<div class="slide slide-content" id="s8">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 08 / 10</div>
+    <div class="s-icon">🛡️</div>
+    <h2>AI 윤리·보안<br>컴플라이언스 체크리스트</h2>
+  </div>
+  <div class="slide-body">
+    <ul class="ethics-check">
+      <li>
+        <div class="ec-box">✓</div>
+        <div><strong>개인정보 처리 방침</strong> — 고객 데이터를 외부 AI에 입력 시 개인정보보호법 준수 여부 확인</div>
+      </li>
+      <li>
+        <div class="ec-box">✓</div>
+        <div><strong>AI 편향 감사</strong> — 채용·평가·대출 등 중요 의사결정에 AI 사용 시 편향 정기 점검</div>
+      </li>
+      <li>
+        <div class="ec-box">✓</div>
+        <div><strong>AI 기본법 대응</strong> — 2025년 시행 AI 기본법의 고위험 AI 분류 기준 숙지 및 준수</div>
+      </li>
+      <li>
+        <div class="ec-box">✓</div>
+        <div><strong>프롬프트 인젝션 방지</strong> — 외부 입력이 AI 시스템 명령을 우회하지 않도록 설계</div>
+      </li>
+      <li>
+        <div class="ec-box">✓</div>
+        <div><strong>AI 생성 콘텐츠 표기</strong> — AI 작성 보고서·마케팅 자료의 출처 명시 정책 수립</div>
+      </li>
+      <li>
+        <div class="ec-box">✓</div>
+        <div><strong>Human-in-the-Loop</strong> — 고위험 결정에는 반드시 사람의 최종 검토 단계 유지</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- 슬라이드 9: AX 선도 사례 -->
+<div class="slide slide-content" id="s9">
+  <div class="slide-header">
+    <div class="s-num">SLIDE 09 / 10</div>
+    <div class="s-icon">🌍</div>
+    <h2>AX 선도 기업<br>벤치마크 사례</h2>
+  </div>
+  <div class="slide-body">
+    <div class="case-card">
+      <div class="case-head">
+        <span class="case-company">🏦 Morgan Stanley</span>
+        <span class="case-tag">금융</span>
+      </div>
+      <div class="case-desc">GPT-4 기반 AI 어시스턴트로 16만 금융 문서를 즉시 검색·분석. FA(금융 어드바이저)의 리서치 시간 대폭 단축.</div>
+      <div class="case-result">→ 직원 생산성 40%↑, 고객 상담 품질 향상</div>
+    </div>
+    <div class="case-card">
+      <div class="case-head">
+        <span class="case-company">🏪 롯데쇼핑</span>
+        <span class="case-tag">유통</span>
+      </div>
+      <div class="case-desc">AI 기반 개인화 추천 시스템 도입. 고객 행동 데이터 분석으로 맞춤 상품 추천·재고 최적화 자동화.</div>
+      <div class="case-result">→ 구매 전환율 25%↑, 재고 비용 15%↓</div>
+    </div>
+    <div class="case-card">
+      <div class="case-head">
+        <span class="case-company">🏥 서울아산병원</span>
+        <span class="case-tag">의료</span>
+      </div>
+      <div class="case-desc">AI 기반 의료 영상 분석으로 CT·MRI 판독 보조. 의사의 판독 속도와 정확도 향상, 2차 소견 자동화.</div>
+      <div class="case-result">→ 판독 시간 60%↓, 조기 발견율 향상</div>
+    </div>
+    <div class="highlight-box">
+      공통점: <strong>소규모 파일럿 → 성과 검증 → 전사 확산</strong>의 단계적 접근
+    </div>
+  </div>
+</div>
+
+<!-- 슬라이드 10: 마무리 -->
+<div class="slide slide-ending" id="s10">
+  <div class="ending-emoji">🏆</div>
+  <div class="ending-title">AX 챔피언의<br>책임과 사명</div>
+  <div class="ending-desc">
+    고급 역량은 개인의 성취가 아닙니다.<br>
+    조직의 AI 여정을 이끌 책임이 생겼습니다.
+  </div>
+  <div class="mission-box">
+    <div class="m-title">🎯 AX 챔피언 미션</div>
+    <div class="m-item">🌱 <span>주변 동료의 AI 역량 성장을 돕는다</span></div>
+    <div class="m-item">📋 <span>조직 AX 전략 수립에 적극 기여한다</span></div>
+    <div class="m-item">🔍 <span>AI 트렌드를 모니터링하고 선제 적용한다</span></div>
+    <div class="m-item">🛡️ <span>책임있는 AI 활용 문화를 만들어간다</span></div>
+  </div>
+  <a href="ax-checklist.html" class="btn-back">↩ 진단 다시 해보기</a>
+</div>
+
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn" id="btnPrev" onclick="move(-1)" disabled>‹</button>
+  <div class="dots-wrap" id="dots"></div>
+  <button class="nav-btn" id="btnNext" onclick="move(1)">›</button>
+</div>
+
+<script>
+const total = 10;
+let cur = 0;
+const dotsWrap = document.getElementById('dots');
+for (let i = 0; i < total; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsWrap.appendChild(d);
+}
+function goTo(n) {
+  document.getElementById('s' + (cur + 1)).classList.remove('active');
+  dotsWrap.children[cur].classList.remove('active');
+  cur = n;
+  document.getElementById('s' + (cur + 1)).classList.add('active');
+  dotsWrap.children[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur + 1} / ${total}`;
+  document.getElementById('btnPrev').disabled = cur === 0;
+  document.getElementById('btnNext').disabled = cur === total - 1;
+  document.getElementById('sliderWrap').scrollTop = 0;
+}
+function move(dir) { if (cur + dir >= 0 && cur + dir < total) goTo(cur + dir); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') move(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   move(-1);
+});
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) move(dx < 0 ? 1 : -1);
+}, { passive: true });
+</script>
+</body>
+</html>
