@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AX 학습 허브 · AI 전환 역량 개발</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #6366F1;
+    --primary-light: #A5B4FC;
+    --primary-dark: #4F46E5;
+    --beginner: #10B981;
+    --intermediate: #F59E0B;
+    --advanced: #EF4444;
+    --text: #1E293B;
+    --text-sub: #64748B;
+    --border: #E2E8F0;
+    --bg: #F8FAFC;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ── 네비 ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(16px, 4vw, 48px);
+    z-index: 100;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .nav-logo span { font-size: 20px; }
+  .nav-cta {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .nav-cta:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+  /* ── 히어로 ── */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #4338CA 0%, #6366F1 40%, #818CF8 75%, #A78BFA 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px clamp(20px, 5vw, 60px) 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 720px; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 99px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 6vw, 56px);
+    font-weight: 900;
+    color: white;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #A5B4FC, #E879F9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: clamp(15px, 2.5vw, 18px);
+    color: rgba(255,255,255,0.75);
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: var(--primary);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+  }
+  .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(99,102,241,0.5); }
+  .btn-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    color: white;
+    border-radius: 14px;
+    padding: 15px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .btn-hero-secondary:hover { background: rgba(255,255,255,0.22); }
+
+  .hero-stats {
+    margin-top: 56px;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .stat-num { font-size: 28px; font-weight: 900; color: white; }
+  .hero-stat .stat-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+  .hero-stat .stat-num em { font-style: normal; color: #A5B4FC; }
+
+  /* ── 공통 섹션 ── */
+  section {
+    padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 60px);
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+  .section-sub {
+    font-size: 16px;
+    color: var(--text-sub);
+    margin-bottom: 48px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+
+  /* ── 학습 콘텐츠 카드 ── */
+  .content-section {
+    background: white;
+    border-radius: 28px;
+    padding: clamp(32px, 5vw, 56px);
+    border: 1.5px solid var(--border);
+    margin: 0 clamp(20px, 5vw, 60px);
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -1px;
+  }
+
+  .level-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 800px) { .level-cards { grid-template-columns: 1fr; } }
+
+  .level-card {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    transition: all 0.2s;
+  }
+  .level-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,0.12); }
+
+  .lc-header {
+    padding: 28px 24px 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .lc-header::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .lc-beginner .lc-header { background: linear-gradient(135deg, #064E3B, #10B981); }
+  .lc-intermediate .lc-header { background: linear-gradient(135deg, #78350F, #F59E0B); }
+  .lc-advanced .lc-header { background: linear-gradient(135deg, #7F1D1D, #EF4444); }
+
+  .lc-emoji { font-size: 40px; margin-bottom: 10px; }
+  .lc-level { font-size: 11px; font-weight: 700; letter-spacing: 2px; opacity: 0.7; margin-bottom: 6px; }
+  .lc-title { font-size: 20px; font-weight: 800; line-height: 1.2; }
+  .lc-badge {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 99px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .lc-body { padding: 20px 24px 22px; background: white; }
+  .lc-desc { font-size: 14px; color: var(--text-sub); line-height: 1.6; margin-bottom: 16px; }
+  .lc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .lc-tag {
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
+  }
+  .lc-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .lc-beginner    .lc-cta { color: #059669; }
+  .lc-intermediate .lc-cta { color: #B45309; }
+  .lc-advanced   .lc-cta { color: #B91C1C; }
+
+  /* ── 진단 CTA 배너 ── */
+  .cta-banner {
+    background: linear-gradient(135deg, #6366F1 0%, #818CF8 50%, #C4B5FD 100%);
+    border-radius: 28px;
+    padding: clamp(40px, 6vw, 64px) clamp(24px, 4vw, 56px);
+    text-align: center;
+    color: white;
+    margin: 0 clamp(20px, 5vw, 60px);
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+  }
+  .cta-banner h2 { font-size: clamp(22px, 4vw, 34px); font-weight: 800; margin-bottom: 14px; color: white; }
+  .cta-banner p { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.6; }
+  .btn-cta-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    color: var(--primary);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 36px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+  }
+  .btn-cta-main:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(99,102,241,0.4); }
+
+
+  /* ── 푸터 ── */
+  footer {
+    background: #1E293B;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 32px 20px;
+    font-size: 13px;
+    margin-top: 80px;
+    line-height: 1.7;
+  }
+  footer strong { color: rgba(255,255,255,0.8); }
+
+  /* ── 반응형 ── */
+  @media (max-width: 640px) {
+    .hero-stats { gap: 24px; }
+    .hero-stat .stat-num { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 네비게이션 -->
+<nav>
+  <a class="nav-logo" href="ax-main.html">
+    <span>🤖</span> AX 학습 허브
+  </a>
+  <a class="nav-cta" href="ax-checklist.html">역량 진단 시작 →</a>
+</nav>
+
+<!-- ── 섹션 1: 히어로 ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🚀 AI Transformation Learning Hub</div>
+    <h1>우리 조직의 AX,<br><em>지금 어디에 있나요?</em></h1>
+    <p>30문항 역량 진단으로 내 AX 수준을 파악하고,<br>초급·중급·고급 맞춤 카드뉴스로 빠르게 성장하세요.</p>
+    <div class="hero-btns">
+      <a class="btn-hero-primary" href="ax-checklist.html">
+        📋 역량 진단 시작하기
+      </a>
+      <a class="btn-hero-secondary" href="#contents">
+        📰 카드뉴스 바로 보기
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-num"><em>30</em>문항</div>
+        <div class="stat-label">역량 진단 체크리스트</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num"><em>4</em>개 영역</div>
+        <div class="stat-label">AI기초·실무·전략·윤리</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num"><em>27</em>장</div>
+        <div class="stat-label">레벨별 카드뉴스</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ── 섹션 3: 학습 콘텐츠 ── -->
+<div class="content-section" id="contents">
+  <div class="section-label" style="margin-bottom:12px;">Learning Contents</div>
+  <div class="section-title" style="margin-bottom:10px;">레벨별 맞춤 카드뉴스</div>
+  <div class="section-sub" style="margin-bottom:36px;">진단 결과에 맞는 카드뉴스를 바로 볼 수 있어요. 모르는 레벨도 미리 탐색해보세요.</div>
+
+  <div class="level-cards">
+    <!-- 초급 -->
+    <a class="level-card lc-beginner" href="card-beginner.html">
+      <div class="lc-header">
+        <div class="lc-badge">8장</div>
+        <div class="lc-emoji">🌱</div>
+        <div class="lc-level">BEGINNER · 초급</div>
+        <div class="lc-title">AI 탐험,<br>지금 시작해요</div>
+      </div>
+      <div class="lc-body">
+        <div class="lc-desc">AI를 처음 접하는 분들을 위한 기초 개념 정리와 오늘 당장 써볼 수 있는 실전 팁.</div>
+        <div class="lc-tags">
+          <span class="lc-tag">AI·ML·DL 개념</span>
+          <span class="lc-tag">생성형 AI 비교</span>
+          <span class="lc-tag">프롬프트 입문</span>
+          <span class="lc-tag">30일 로드맵</span>
+        </div>
+        <div class="lc-cta">
+          <span>카드뉴스 보기</span>
+          <span>→</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 중급 -->
+    <a class="level-card lc-intermediate" href="card-intermediate.html">
+      <div class="lc-header">
+        <div class="lc-badge">9장</div>
+        <div class="lc-emoji">🔥</div>
+        <div class="lc-level">INTERMEDIATE · 중급</div>
+        <div class="lc-title">도구를 넘어<br>워크플로우로</div>
+      </div>
+      <div class="lc-body">
+        <div class="lc-desc">AI 실무 활용을 고도화하고, 업무 자동화와 팀 AI 문화 확산을 이끌어갈 역량 강화.</div>
+        <div class="lc-tags">
+          <span class="lc-tag">프롬프트 고도화</span>
+          <span class="lc-tag">업무 자동화</span>
+          <span class="lc-tag">AI 워크플로우</span>
+          <span class="lc-tag">팀 확산 전략</span>
+        </div>
+        <div class="lc-cta">
+          <span>카드뉴스 보기</span>
+          <span>→</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- 고급 -->
+    <a class="level-card lc-advanced" href="card-advanced.html">
+      <div class="lc-header">
+        <div class="lc-badge">10장</div>
+        <div class="lc-emoji">🏆</div>
+        <div class="lc-level">ADVANCED · 고급</div>
+        <div class="lc-title">전략·실행·변화를<br>이끄는 자</div>
+      </div>
+      <div class="lc-body">
+        <div class="lc-desc">조직의 AX 전략을 수립하고 AI 에이전트·변화관리·ROI 측정으로 혁신을 선도하는 리더십.</div>
+        <div class="lc-tags">
+          <span class="lc-tag">AX 전략 프레임</span>
+          <span class="lc-tag">AI 에이전트</span>
+          <span class="lc-tag">변화관리</span>
+          <span class="lc-tag">AI 윤리·보안</span>
+        </div>
+        <div class="lc-cta">
+          <span>카드뉴스 보기</span>
+          <span>→</span>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ── 섹션 4: CTA 배너 ── -->
+<section style="padding-top: clamp(48px, 6vw, 80px);">
+  <div class="cta-banner">
+    <h2>내 레벨을 먼저 확인하고<br>맞춤 콘텐츠로 시작하세요!</h2>
+    <p>30문항, 약 5분이면 나의 AX 역량 수준을 정확히 파악할 수 있습니다.</p>
+    <a class="btn-cta-main" href="ax-checklist.html">
+      📋 역량 진단 30문항 시작하기 →
+    </a>
+  </div>
+</section>
+
+<!-- 푸터 -->
+<footer>
+  <strong>AX 학습 허브</strong> · AI 전환(AX) 역량 개발 프로그램<br>
+  사내 배포용 데모 버전 · 문의: 담당 부서
+</footer>
+
+</body>
+</html>
