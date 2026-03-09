@@ -90,13 +90,3 @@ open index.html
 
 ---
 
-## 🔗 관련 프로젝트
-
-| 프로젝트 | 링크 |
-|---|---|
-| JESS 영어예배부 홈페이지 | [jhr122333.github.io/sermon](https://jhr122333.github.io/sermon/) |
-| SOP QA Assistant | [jhr122333.github.io/sop-qa-assistant](https://jhr122333.github.io/sop-qa-assistant/sop-qa-demo.html) |
-
----
-
-*사내 배포용 데모 버전 · Made with Claude Code*
